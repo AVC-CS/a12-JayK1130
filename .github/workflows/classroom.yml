@@ -1,0 +1,92 @@
+name: GitHub Classroom Workflow
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  repository_dispatch:
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ---- Grader 1: compile main.cpp (20 pts) ----
+      - name: Compile main.cpp
+        id: compile
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "Compile main.cpp"
+          command: g++ -std=c++17 -Wall -Wextra main.cpp -o a.out
+          timeout: 30
+          max-score: 20
+
+      # ---- Run program to generate result.txt ----
+      - name: Run program
+        run: ./a.out > result.txt
+
+      # Install pytest
+      - name: Install pytest
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pytest
+
+      # ---- Grader 2: T1 - segment labels (20 pts) ----
+      - name: T1 tests
+        id: T1
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "T1 tests"
+          command: pytest -rP -m T1
+          timeout: 10
+          max-score: 20
+
+      # ---- Grader 3: T2 - hex addresses (20 pts) ----
+      - name: T2 tests
+        id: T2
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "T2 tests"
+          command: pytest -rP -m T2
+          timeout: 10
+          max-score: 20
+
+      # ---- Grader 4: T3 - stack grows down (20 pts) ----
+      - name: T3 tests
+        id: T3
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "T3 tests"
+          command: pytest -rP -m T3
+          timeout: 10
+          max-score: 20
+
+      # ---- Grader 5: T4 - heap grows up (20 pts) ----
+      - name: T4 tests
+        id: T4
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: "T4 tests"
+          command: pytest -rP -m T4
+          timeout: 10
+          max-score: 20
+
+      # ---- Reporter ----
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          COMPILE_RESULTS: "${{ steps.compile.outputs.result }}"
+          T1_RESULTS: "${{ steps.T1.outputs.result }}"
+          T2_RESULTS: "${{ steps.T2.outputs.result }}"
+          T3_RESULTS: "${{ steps.T3.outputs.result }}"
+          T4_RESULTS: "${{ steps.T4.outputs.result }}"
+        with:
+          runners: compile,T1,T2,T3,T4

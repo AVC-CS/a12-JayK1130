@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <cstdint>
 
 using namespace std;
 
@@ -17,7 +18,7 @@ void checkStack(int* parentAddr) {
     cout << "&parentAddr (param addr):      " << (void*)&parentAddr << endl;
     cout << "&childVar (child local):       " << (void*)&childVar << endl;
 
-    if (parentAddr > &childVar) {
+    if ((uintptr_t)parentAddr > (uintptr_t)&childVar) {
         cout << "Stack grows DOWN" << endl;
     } else {
         cout << "Stack grows UP" << endl;
@@ -54,7 +55,7 @@ int main() {
     cout << "p1 = " << (void*)p1 << endl;
     cout << "p2 = " << (void*)p2 << endl;
 
-    if (p1 < p2) {
+    if ((uintptr_t)p1 < (uintptr_t)p2) {
         cout << "Heap grows UP" << endl;
     } else {
         cout << "Heap grows DOWN" << endl;
